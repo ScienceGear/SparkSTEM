@@ -1,0 +1,432 @@
+import { useState, lazy, Suspense } from "react";
+import { useRoute } from "wouter";
+import { useGetLabById } from "@workspace/api-client-react";
+import { PlayfulButton, Badge } from "@/components/PlayfulUI";
+import {
+  Clock, BookOpen, ChevronLeft, CheckCircle2, FlaskConical,
+  ListOrdered, Target, Sparkles, Maximize2, Minimize2, ExternalLink
+} from "lucide-react";
+import { Link } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { simulationConfigs } from "@/simulations/simulationConfig";
+
+const PhotosynthesisSim = lazy(() => import("@/simulations/PhotosynthesisSim"));
+const DNAReplicationSim = lazy(() => import("@/simulations/DNAReplicationSim"));
+const HumanHeartSim = lazy(() => import("@/simulations/HumanHeartSim"));
+
+function SimulationLoader() {
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-slate-900 rounded-xl">
+      <div className="text-center text-white">
+        <div className="text-4xl mb-3 animate-bounce">⚗️</div>
+        <p className="font-bold text-lg animate-pulse">Loading simulation…</p>
+      </div>
+    </div>
+  );
+}
+
+function CustomSimulation({ labId }: { labId: string }) {
+  if (labId === "photosynthesis") return <Suspense fallback={<SimulationLoader />}><PhotosynthesisSim /></Suspense>;
+  if (labId === "dna-replication") return <Suspense fallback={<SimulationLoader />}><DNAReplicationSim /></Suspense>;
+  if (labId === "human-heart") return <Suspense fallback={<SimulationLoader />}><HumanHeartSim /></Suspense>;
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-slate-900 rounded-xl text-white text-center p-8">
+      <div>
+        <div className="text-5xl mb-4">🔬</div>
+        <h3 className="text-xl font-bold mb-2">Interactive Simulation</h3>
+        <p className="text-white/60">Simulation for this lab is coming soon!</p>
+      </div>
+    </div>
+  );
+}
+
+export default function LabDetail() {
+  const [, params] = useRoute("/labs/:id");
+  const id = params?.id || "";
+  const { data: lab, isLoading, error } = useGetLabById(id);
+  const [activeTab, setActiveTab] = useState<"theory" | "procedure" | "materials">("theory");
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4 animate-bounce">🔬</div>
+          <p className="text-xl font-bold text-primary animate-pulse">Loading Experiment…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !lab) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <div className="text-6xl">😔</div>
+        <h2 className="text-2xl font-bold">Lab not found!</h2>
+        <Link href="/labs"><PlayfulButton>← Back to Labs</PlayfulButton></Link>
+      </div>
+    );
+  }
+
+  const simConfig = simulationConfigs[id];
+  const hasSimulation = !!simConfig;
+
+  const simBgClass = simConfig?.type === "custom"
+    ? ""
+    : "bg-slate-950";
+
+  return (
+    <div className="min-h-screen pb-20">
+      {/* Fullscreen overlay for simulation */}
+      <AnimatePresence>
+        {isFullscreen && isSimulating && simConfig && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black flex flex-col"
+          >
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-gray-700">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{lab.thumbnailEmoji}</span>
+                <span className="text-white font-bold">{lab.title}</span>
+                <span className="text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded">via {simConfig.source}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {simConfig.type === "iframe" && simConfig.iframeUrl && (
+                  <a
+                    href={simConfig.iframeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors flex items-center gap-1 text-sm"
+                  >
+                    <ExternalLink className="w-4 h-4" /> Open in new tab
+                  </a>
+                )}
+                <button
+                  onClick={() => setIsFullscreen(false)}
+                  className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 text-sm transition-colors"
+                >
+                  <Minimize2 className="w-4 h-4" /> Exit Fullscreen
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 relative">
+              {simConfig.type === "iframe" && simConfig.iframeUrl ? (
+                <iframe
+                  src={simConfig.iframeUrl}
+                  className="w-full h-full border-0"
+                  title={simConfig.title}
+                  allow="fullscreen"
+                />
+              ) : (
+                <div className="w-full h-full">
+                  <CustomSimulation labId={id} />
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Header */}
+      <div className="bg-white border-b border-border pt-8 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link href="/labs" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary font-bold mb-6 transition-colors">
+            <ChevronLeft className="w-5 h-5" /> Back to all labs
+          </Link>
+
+          <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <Badge color="primary">{lab.subject}</Badge>
+                <Badge color={lab.difficulty === "beginner" ? "secondary" : "accent"}>{lab.difficulty}</Badge>
+                <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                  <Clock className="w-4 h-4" /> {lab.duration} min
+                </div>
+                {hasSimulation && (
+                  <div className="flex items-center gap-1.5 text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                    ✅ Interactive Sim Available
+                  </div>
+                )}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4">
+                <span className="text-5xl mr-3">{lab.thumbnailEmoji}</span>
+                {lab.title}
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-3xl">{lab.description}</p>
+            </div>
+
+            <div className="flex gap-3 w-full md:w-auto flex-wrap">
+              {!isSimulating ? (
+                <PlayfulButton
+                  size="lg"
+                  className="w-full md:w-auto text-xl shadow-xl shadow-primary/20"
+                  onClick={() => { setIsSimulating(true); setIframeLoaded(false); }}
+                >
+                  ▶ Launch Simulation <Sparkles className="ml-2 w-6 h-6" />
+                </PlayfulButton>
+              ) : (
+                <>
+                  <PlayfulButton
+                    variant="outline"
+                    size="lg"
+                    className="border-4"
+                    onClick={() => setIsSimulating(false)}
+                  >
+                    ✕ Close Sim
+                  </PlayfulButton>
+                  {hasSimulation && (
+                    <PlayfulButton
+                      variant="secondary"
+                      size="lg"
+                      onClick={() => setIsFullscreen(true)}
+                    >
+                      <Maximize2 className="w-5 h-5 mr-2" /> Fullscreen
+                    </PlayfulButton>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid lg:grid-cols-3 gap-12">
+        {/* Main Content Area */}
+        <div className="lg:col-span-2 space-y-8">
+
+          {/* Simulation Area */}
+          <div
+            className={`rounded-[2rem] overflow-hidden shadow-2xl relative border-4 border-gray-800 transition-all duration-500 ${
+              isSimulating ? "aspect-video" : "aspect-video opacity-80"
+            }`}
+          >
+            {isSimulating && simConfig ? (
+              <div className={`w-full h-full ${simBgClass}`}>
+                {simConfig.type === "iframe" && simConfig.iframeUrl ? (
+                  <div className="relative w-full h-full">
+                    {!iframeLoaded && (
+                      <div className="absolute inset-0 bg-slate-900 flex items-center justify-center z-10">
+                        <div className="text-center text-white">
+                          <div className="text-5xl mb-4 animate-spin">⚗️</div>
+                          <p className="font-bold text-lg animate-pulse">Loading {simConfig.source} simulation…</p>
+                          <p className="text-sm text-white/50 mt-2">This may take a moment</p>
+                        </div>
+                      </div>
+                    )}
+                    <iframe
+                      src={simConfig.iframeUrl}
+                      className="w-full h-full border-0"
+                      title={simConfig.title}
+                      allow="fullscreen"
+                      onLoad={() => setIframeLoaded(true)}
+                    />
+                    {/* Source badge */}
+                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      {simConfig.source}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-full">
+                    <CustomSimulation labId={id} />
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Preview state */
+              <div
+                className="w-full h-full bg-gradient-to-br from-slate-900 to-primary/40 flex flex-col items-center justify-center text-white cursor-pointer group"
+                onClick={() => { setIsSimulating(true); setIframeLoaded(false); }}
+              >
+                <div className="text-8xl mb-4 group-hover:scale-110 transition-transform">{lab.thumbnailEmoji}</div>
+                <h3 className="text-2xl font-bold mb-2">
+                  {hasSimulation ? "Interactive Simulation Ready" : "Simulation Area"}
+                </h3>
+                <p className="text-white/60 mb-6">
+                  {hasSimulation
+                    ? `Powered by ${simConfig.source}`
+                    : "Click to activate the experiment workspace"}
+                </p>
+                <div className="flex items-center gap-2 bg-white/20 hover:bg-white/30 transition-colors px-6 py-3 rounded-2xl font-bold border border-white/30">
+                  <span>▶</span>
+                  {hasSimulation ? "Launch Interactive Sim" : "Start Experiment"}
+                </div>
+
+                {hasSimulation && simConfig.type === "iframe" && (
+                  <div className="mt-4 flex items-center gap-2 text-xs text-white/40">
+                    <span>Embedded from {simConfig.source}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Tabs */}
+          <div className="bg-white rounded-3xl border-2 border-border p-2 flex gap-2">
+            {[
+              { id: "theory", label: "Theory", icon: BookOpen },
+              { id: "procedure", label: "Procedure", icon: ListOrdered },
+              { id: "materials", label: "Materials", icon: FlaskConical },
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold transition-all relative ${
+                    isActive ? "text-primary" : "text-muted-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div layoutId="activeTab" className="absolute inset-0 bg-primary/10 rounded-2xl" />
+                  )}
+                  <tab.icon className="w-5 h-5 relative z-10" />
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="bg-white rounded-3xl border-2 border-border p-8 min-h-[300px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === "theory" && (
+                  <div>
+                    <h3 className="text-2xl font-bold mb-4">The Science Behind It</h3>
+                    <p className="text-muted-foreground leading-relaxed text-lg">{lab.theory}</p>
+                  </div>
+                )}
+                {activeTab === "procedure" && (
+                  <div>
+                    <h3 className="text-2xl font-bold mb-6">Steps to Follow</h3>
+                    <div className="space-y-4">
+                      {lab.procedure?.map((step, i) => (
+                        <div key={i} className="flex gap-4 p-4 rounded-2xl bg-muted/50 border border-border/50">
+                          <div className="w-8 h-8 shrink-0 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                            {i + 1}
+                          </div>
+                          <p className="pt-1 font-medium">{step}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {isSimulating && (
+                      <div className="mt-6 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-2xl flex items-center gap-3">
+                        <span className="text-2xl">✅</span>
+                        <p className="text-emerald-700 font-bold">Simulation is active — follow the steps above in the sim!</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {activeTab === "materials" && (
+                  <div>
+                    <h3 className="text-2xl font-bold mb-6">What You Need</h3>
+                    <ul className="grid grid-cols-2 gap-4">
+                      {lab.materials?.map((item, i) => (
+                        <li key={i} className="flex items-center gap-3 bg-white border-2 border-border p-4 rounded-xl font-bold">
+                          <div className="text-primary"><CheckCircle2 className="w-5 h-5" /></div>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                    {hasSimulation && (
+                      <div className="mt-6 p-4 bg-primary/5 border-2 border-primary/20 rounded-2xl">
+                        <p className="text-primary font-bold flex items-center gap-2">
+                          <Sparkles className="w-5 h-5" />
+                          Virtual lab: no physical materials needed! Everything is simulated.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Simulation Info Card */}
+          {hasSimulation && (
+            <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-6 text-white">
+              <h3 className="flex items-center gap-2 text-lg font-bold mb-3">
+                🎮 Interactive Simulation
+              </h3>
+              <p className="text-white/80 text-sm mb-4">
+                This lab features a fully interactive simulation
+                {simConfig.type === "iframe" ? ` powered by ${simConfig.source}` : " built for WonderKids"}.
+              </p>
+              {simConfig.type === "iframe" && simConfig.iframeUrl && (
+                <a
+                  href={simConfig.iframeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" /> Open on {simConfig.source}
+                </a>
+              )}
+              {!isSimulating && (
+                <button
+                  onClick={() => { setIsSimulating(true); setIframeLoaded(false); }}
+                  className="mt-4 w-full bg-white text-primary font-bold py-2.5 rounded-xl hover:bg-white/90 transition-colors"
+                >
+                  ▶ Launch Now
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Objectives */}
+          <div className="bg-secondary/10 rounded-3xl border-2 border-secondary/20 p-8">
+            <h3 className="flex items-center gap-2 text-xl font-display font-bold text-secondary-dark mb-6">
+              <Target className="w-6 h-6" /> Learning Objectives
+            </h3>
+            <ul className="space-y-4">
+              {lab.objectives?.map((obj, i) => (
+                <li key={i} className="flex items-start gap-3 text-secondary-dark/80 font-medium">
+                  <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-secondary/20 flex items-center justify-center text-xs font-bold text-secondary-dark">
+                    {i + 1}
+                  </div>
+                  <span>{obj}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Points card */}
+          <div className="bg-primary rounded-3xl p-8 text-white text-center shadow-lg shadow-primary/30">
+            <div className="text-4xl mb-4">🏆</div>
+            <h3 className="text-xl font-bold mb-2">Complete to earn</h3>
+            <p className="text-white/80 mb-6 font-medium">Science Explorer Badge & 50 Points!</p>
+            <button className="w-full bg-white text-primary font-bold py-3 rounded-xl border-b-4 border-white/80 hover:bg-gray-50 active:border-b-0 active:translate-y-1 transition-all">
+              ✓ Mark as Done
+            </button>
+          </div>
+
+          {/* Tags */}
+          <div className="bg-white rounded-3xl border-2 border-border p-6">
+            <h3 className="font-bold text-lg mb-3">🏷️ Topics</h3>
+            <div className="flex flex-wrap gap-2">
+              {lab.tags?.map(tag => (
+                <span key={tag} className="bg-primary/10 text-primary font-bold text-sm px-3 py-1 rounded-full">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

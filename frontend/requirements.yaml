@@ -1,0 +1,24 @@
+packages:
+  "framer-motion": "For page transitions and playful, engaging animations typical of a kids learning platform"
+  "lucide-react": "For beautiful, consistent iconography across the application"
+  "clsx": "For conditional class name merging"
+  "tailwind-merge": "For merging tailwind classes in reusable components"
+
+images:
+  - path: "frontend/public/images/hero-illustration.png"
+    description: "A vibrant, playful 3D illustration of diverse kids doing a magical science experiment with glowing purple and yellow potions, modern cartoon style on a clean background"
+    aspect_ratio: "16:9"
+  - path: "frontend/public/images/ai-avatar.png"
+    description: "A cute, friendly 3D robot character wearing a small lab coat, bright and colorful with yellow and purple accents, perfect for a kids AI tutor"
+    aspect_ratio: "1:1"
+  - path: "frontend/public/images/decorative-blob.png"
+    description: "Abstract soft gradient 3D blob shape in deep purple and bright yellow, transparent background, for decorative floating elements"
+    aspect_ratio: "1:1"
+  - path: "frontend/public/images/lab-placeholder.png"
+    description: "A stylized, colorful 3D rendering of a microscope and test tubes on a desk, used as a placeholder for interactive virtual science labs"
+    aspect_ratio: "16:9"
+
+notes:
+  - Backend is assumed to provide hooks via @workspace/api-client-react
+  - Routing handled by wouter
+  - The design is highly playful, targeting rural students but with a $1M startup budget feel (bold colors, rounded corners, large typography)

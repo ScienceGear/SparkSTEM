@@ -39,16 +39,16 @@ export const simulationConfigs: Record<string, SimulationConfig> = {
   "photosynthesis": {
     type: "custom",
     title: "Photosynthesis Simulator",
-    source: "WonderKids Custom Lab",
+    source: "SparkSTEM Custom Lab",
   },
   "dna-replication": {
     type: "custom",
     title: "DNA Replication Visualizer",
-    source: "WonderKids Custom Lab",
+    source: "SparkSTEM Custom Lab",
   },
   "human-heart": {
     type: "custom",
     title: "Human Heart Explorer",
-    source: "WonderKids Custom Lab",
+    source: "SparkSTEM Custom Lab",
   },
 };

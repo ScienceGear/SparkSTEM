@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useGetLabs } from "@workspace/api-client-react";
+import { useGetLabs } from "@/lib/api-client";
 import { PlayfulCard, Badge } from "@/components/PlayfulUI";
 import { Search, Clock, BookOpen, Zap } from "lucide-react";
 import { motion } from "framer-motion";

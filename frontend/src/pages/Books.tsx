@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetBooks } from "@workspace/api-client-react";
+import { useGetBooks } from "@/lib/api-client";
 import { Badge } from "@/components/PlayfulUI";
 import {
   Book, ChevronDown, ChevronRight, FlaskConical,

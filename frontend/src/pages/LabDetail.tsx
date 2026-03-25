@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { useRoute } from "wouter";
-import { useGetLabById } from "@workspace/api-client-react";
+import { useGetLabById } from "@/lib/api-client";
 import { PlayfulButton, Badge } from "@/components/PlayfulUI";
 import {
   Clock, BookOpen, ChevronLeft, CheckCircle2, FlaskConical,
@@ -364,7 +364,7 @@ export default function LabDetail() {
               </h3>
               <p className="text-white/80 text-sm mb-4">
                 This lab features a fully interactive simulation
-                {simConfig.type === "iframe" ? ` powered by ${simConfig.source}` : " built for WonderKids"}.
+                {simConfig.type === "iframe" ? ` powered by ${simConfig.source}` : " built for SparkSTEM"}.
               </p>
               {simConfig.type === "iframe" && simConfig.iframeUrl && (
                 <a

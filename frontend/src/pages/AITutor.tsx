@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useAskAI } from "@workspace/api-client-react";
+import { useAskAI } from "@/lib/api-client";
 import { PlayfulCard } from "@/components/PlayfulUI";
 import { Send, Bot, Sparkles, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

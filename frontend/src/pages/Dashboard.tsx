@@ -1,4 +1,4 @@
-import { useGetProgress } from "@workspace/api-client-react";
+import { useGetProgress } from "@/lib/api-client";
 import { PlayfulCard } from "@/components/PlayfulUI";
 import { Trophy, Flame, Star, Activity, Hexagon } from "lucide-react";
 import { motion } from "framer-motion";

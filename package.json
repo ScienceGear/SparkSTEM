@@ -7,8 +7,10 @@
     "backend"
   ],
   "scripts": {
-    "start": "concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+    "start": "npm run build -w backend && concurrently -n \"frontend,backend\" -c \"cyan,green\" \"npm run dev -w frontend\" \"npm run start -w backend\"",
+    "dev": "concurrently -n \"frontend,backend\" -c \"cyan,green\" \"npm run dev -w frontend\" \"npm run dev -w backend\"",
     "build": "npm run build --workspaces --if-present",
+    "build:backend": "npm run build -w backend",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "private": true,

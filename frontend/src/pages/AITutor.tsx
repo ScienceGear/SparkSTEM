@@ -3,6 +3,11 @@ import { useAskAI } from "@/lib/api-client";
 import { PlayfulCard } from "@/components/PlayfulUI";
 import { Send, Bot, Sparkles, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 type Message = {
   id: string;
@@ -86,10 +91,19 @@ export default function AITutor() {
                 
                 <div className={`max-w-[80%] p-4 text-[15px] leading-relaxed font-medium ${
                   msg.role === 'ai' 
-                    ? 'bg-white border-2 border-border rounded-2xl rounded-tl-none shadow-sm text-foreground' 
+                    ? 'bg-white border-2 border-border rounded-2xl rounded-tl-none shadow-sm text-foreground prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 [&_p]:text-foreground [&_strong]:text-foreground' 
                     : 'bg-primary text-white rounded-2xl rounded-tr-none shadow-md shadow-primary/20'
                 }`}>
-                  {msg.content}
+                  {msg.role === 'ai' ? (
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm, remarkMath]} 
+                      rehypePlugins={[rehypeKatex]}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </motion.div>
             ))}

@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import labsRouter from "./labs";
 import subjectsRouter from "./subjects";
-import booksRouter from "./books";
+import booksRouter from "./books_new";  // Using new optimized books route
 import progressRouter from "./progress";
 import aiRouter from "./ai";
 

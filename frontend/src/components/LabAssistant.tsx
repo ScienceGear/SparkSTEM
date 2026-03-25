@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface Message {
   role: "user" | "assistant";
@@ -8,7 +13,10 @@ interface Message {
 
 export function LabAssistant({ labId }: { labId: string }) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Hi! I'm Spark, your lab assistant. Ask me anything about this experiment!" }
+    { 
+      role: "assistant", 
+      content: `Hello! 👋 I'm SparkAI, your expert STEM tutor for the **${labId.replace("-", " ")} lab**. I'm here to help you understand the physics, troubleshoot your experiments, or solve calculations — just let me know what you need!` 
+    }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +37,7 @@ export function LabAssistant({ labId }: { labId: string }) {
     setIsLoading(true);
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
       const response = await fetch(`${baseUrl}/api/ai/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,12 +73,23 @@ export function LabAssistant({ labId }: { labId: string }) {
             }`}>
               {msg.role === "user" ? <User className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
             </div>
-            <div className={`p-3 rounded-2xl max-w-[80%] text-sm ${
+            <div className={`p-3 rounded-2xl max-w-[85%] text-sm ${
               msg.role === "user" 
                 ? "bg-indigo-600 text-white rounded-tr-none" 
-                : "bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm"
+                : "bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm prose prose-sm max-w-none prose-indigo prose-p:my-1 prose-headings:my-2 prose-ul:my-1"
             }`}>
-              {msg.content}
+              {msg.role === "user" ? (
+                msg.content
+              ) : (
+                <div className="prose prose-sm max-w-none prose-indigo prose-p:my-1 prose-headings:my-2 prose-ul:my-1 [&_p]:text-slate-700 [&_strong]:text-indigo-900 [&_ul]:list-disc [&_ol]:list-decimal">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm, remarkMath]} 
+                    rehypePlugins={[rehypeKatex]}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
         ))}

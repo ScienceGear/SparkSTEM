@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { useGetLabs } from "@/lib/api-client";
 import { PlayfulCard, Badge } from "@/components/PlayfulUI";
-import { Search, Clock, BookOpen, Zap } from "lucide-react";
+import { Search, Clock, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { simulationConfigs } from "@/simulations/simulationConfig";
 
@@ -112,11 +112,6 @@ export default function Labs() {
             >
               <Link href={`/labs/${lab.id}`}>
                 <PlayfulCard hover className="h-full flex flex-col cursor-pointer border-b-4 border-r-4 relative overflow-hidden">
-                  {simulationConfigs[lab.id] && (
-                    <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 z-10">
-                      <Zap className="w-3 h-3" /> Live Sim
-                    </div>
-                  )}
                   <div className="flex justify-between items-start mb-4">
                     <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center text-3xl shadow-sm">
                       {lab.thumbnailEmoji}

@@ -8,7 +8,7 @@ export interface SimulationConfig {
 export const simulationConfigs: Record<string, SimulationConfig> = {
   "projectile-motion": {
     type: "iframe",
-    iframeUrl: "https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_en.html",
+    iframeUrl: "/simulations/projectile-motion.html",
     title: "Projectile Motion - PhET Interactive",
     source: "PhET Colorado",
   },

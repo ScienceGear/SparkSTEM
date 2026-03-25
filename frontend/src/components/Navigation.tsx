@@ -29,7 +29,7 @@ export function Navigation() {
               <Beaker className="w-6 h-6" />
             </div>
             <span className="font-display font-bold text-2xl text-foreground tracking-tight">
-              Wonder<span className="text-primary">Kids</span>
+              Spark<span className="text-primary">STEM</span>
             </span>
           </Link>
 

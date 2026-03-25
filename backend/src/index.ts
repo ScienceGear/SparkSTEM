@@ -1,7 +1,8 @@
+import "dotenv/config";
 import app from "./app";
 import { logger } from "./lib/logger";
 
-const port = 3000;
+const port = 3001;
 
 app.listen(port, (err) => {
   if (err) {

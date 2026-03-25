@@ -9,6 +9,7 @@ import {
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { simulationConfigs } from "@/simulations/simulationConfig";
+import { LabAssistant } from "@/components/LabAssistant";
 
 const PhotosynthesisSim = lazy(() => import("@/simulations/PhotosynthesisSim"));
 const DNAReplicationSim = lazy(() => import("@/simulations/DNAReplicationSim"));
@@ -386,6 +387,11 @@ export default function LabDetail() {
               )}
             </div>
           )}
+
+          {/* Lab Assistant */}
+          <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-indigo-100">
+             <LabAssistant labId={id} />
+          </div>
 
           {/* Objectives */}
           <div className="bg-secondary/10 rounded-3xl border-2 border-secondary/20 p-8">
